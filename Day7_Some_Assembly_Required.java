@@ -1,32 +1,39 @@
 package AdventOfCode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
 class Signal {
+	public HashMap<String, Integer> variable = new HashMap<>();
 
-	public void assign(char var, int assigned) {
-		variable.put(var, assigned);
+	public boolean hasValue (String word) {
+		try {
+			int number = Integer.parseInt(word);
+		} catch (NumberFormatException nfe) {
+			if (!variable.containsKey(word)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
-	public void and(char var, int x, int y) {
-		variable.put(var, x & y);
+	public int getValue(String word) {
+		try {
+			return Integer.parseInt(word);
+		} catch (NumberFormatException nfe) {
+			return variable.get(word);
+		}
 	}
 
-	public void or(char var, int x, int y) {
-		variable.put(var, x | y);
-	}
-
-	public void lShift(char var, char x, int shift) {
-		variable.put(var, variable.get(x) << shift);
-	}
-
-	public void rShift(char var, char x, int shift) {
-		variable.put(var, variable.get(x) >> shift);
-	}
-
-	public void not(char var, int x) {
-		variable.put(var, ~ x);
+	public void checkBorders( String word) {
+		int value = variable.get(word);
+		if (value > 65535) {
+			variable.put(word, value - 65535 - 1);
+		}
+		if (value < 0) {
+			variable.put(word, 65535 + value + 1);
+		}
 	}
 }
 
@@ -34,12 +41,89 @@ class Signal {
 public class Day7_Some_Assembly_Required {
 	public static void signals() {
 		Scanner input = new Scanner(System.in);
-		HashMap<Character, Integer> variable = new HashMap<>();
+		Signal signal = new Signal();
+		ArrayList<String[]> word = new ArrayList<>();
 		String line;
 
-		while (!(line = input.next()).equals("exit")) {
-			String[] word = line.split(" ");
-			char var = word[word.length - 1].charAt(0);
+		while (!(line = input.nextLine()).equals("exit")) {
+			word.add( line.split(" ") );
 		}
+
+		while (word.size() > 0) {
+			for (int i = 0; i < word.size(); i++) {
+
+				if (signal.hasValue( word.get(i)[0])) {
+					int firstValue = signal.getValue( word.get(i)[0]);
+
+					switch (word.get(i)[1]) {
+						case "->":
+							signal.variable.put( word.get(i)[2], firstValue);
+
+							word.remove(i);
+							i--;
+							break;
+
+						case "AND":
+							if (signal.hasValue( word.get(i)[2])) {
+								int secondValue = signal.getValue( word.get(i)[2]);
+								signal.variable.put( word.get(i)[4], firstValue & secondValue);
+								signal.checkBorders( word.get(i)[4]);
+
+								word.remove(i);
+								i--;
+							} break;
+
+						case "OR" :
+							if (signal.hasValue( word.get(i)[2])) {
+								int secondValue = signal.getValue( word.get(i)[2]);
+								signal.variable.put( word.get(i)[4], firstValue | secondValue);
+								signal.checkBorders( word.get(i)[4]);
+
+								word.remove(i);
+								i--;
+							} break;
+
+						case "LSHIFT" :
+							if (signal.hasValue( word.get(i)[2])) {
+								int secondValue = signal.getValue( word.get(i)[2]);
+								signal.variable.put( word.get(i)[4], firstValue << secondValue);
+								signal.checkBorders( word.get(i)[4]);
+
+								word.remove(i);
+								i--;
+							} break;
+
+						case "RSHIFT" :
+							if (signal.hasValue( word.get(i)[2])) {
+								int secondValue = signal.getValue( word.get(i)[2]);
+								signal.variable.put( word.get(i)[4], firstValue >> secondValue);
+								signal.checkBorders( word.get(i)[4]);
+
+								word.remove(i);
+								i--;
+							} break;
+					}
+				} else if (word.get(i)[0].equals( "NOT")) {
+					if (signal.hasValue( word.get(i)[1])) {
+						int firstValue = signal.getValue( word.get(i)[1]);
+						signal.variable.put( word.get(i)[3], ~ firstValue);
+						signal.checkBorders( word.get(i)[3]);
+
+						word.remove(i);
+						i--;
+					}
+				}
+			}
+		}
+
+		System.out.println( signal.variable.get("a"));
 	}
 }
+
+
+
+
+
+
+
+
