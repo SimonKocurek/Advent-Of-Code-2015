@@ -45,8 +45,14 @@ public class Day7_Some_Assembly_Required {
 		ArrayList<String[]> word = new ArrayList<>();
 		String line;
 
+		//result of part 1
+		signal.variable.put("b", 46065);
+
 		while (!(line = input.nextLine()).equals("exit")) {
-			word.add( line.split(" ") );
+			String[] words = line.split(" ");
+			if (!(words[2].equals("b"))) {
+				word.add( words);
+			}
 		}
 
 		while (word.size() > 0) {
