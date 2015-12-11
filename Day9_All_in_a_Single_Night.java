@@ -4,147 +4,127 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-class City {
-	private String cityName;
-	public int ID;
-	public HashMap<String, Integer> distance = new HashMap<>();
-	boolean visited = false;
+class Tree {
+	private Travel travel;
+	ArrayList<Integer> travelled = new ArrayList<>();
+	int shortest = Integer.MAX_VALUE;
 
-	public City( String name) {
-		cityName = name;
+	public void setTravel(Travel travelInfo) {
+		travel = travelInfo;
 	}
 
-	public String getName() {
-		return cityName;
+	private boolean allVisited() {
+		return !travel.visited.containsValue(false);
 	}
 
-	public void setDistance(String distanceTo, Integer setDistanceValue) {
-		distance.put( distanceTo, setDistanceValue);
+	public void visit(String city1, String city2) {
+		travel.visited.put( city2, true);
+
+		for (int i = 0; i < travel.city1.size(); i++) {
+			if (travel.city1.get(i).equals( city1) && travel.city2.get(i).equals( city2)) {
+				travelled.add( travel.distance.get(i));
+				break;
+			}
+
+			if (travel.city2.get(i).equals( city1) && travel.city1.get(i).equals( city2)) {
+				travelled.add( travel.distance.get(i));
+				break;
+			}
+		}
 	}
 
-	public int getDistance(String distanceTo) {
-		return distance.get(distanceTo);
+	public void unVisit(String city) {
+		travel.visited.put( city, false);
+		if ( travelled.size() > 0) {
+			travelled.remove( travelled.size() - 1);
+		}
+	}
+
+	public void search(String root) {
+		for (String reachableCity : travel.reachable(root)) {
+			//only unvisited
+			visit(root, reachableCity);
+
+			if (allVisited()) {
+				shortest = Math.min(shortest, Travel.sum(travelled));
+				unVisit(reachableCity);
+			}
+
+			search(reachableCity);
+
+			//after returns from recursion
+			unVisit(reachableCity);
+		}
 	}
 }
 
 class Travel {
-	public ArrayList<City> world = new ArrayList<>();
+	ArrayList<Integer> distance = new ArrayList<>();
+	ArrayList<String> city1 = new ArrayList<>();
+	ArrayList<String> city2 = new ArrayList<>();
+	HashMap<String, Boolean> visited = new HashMap<>();
+
+	public static int sum(ArrayList<Integer> list) {
+		int result = 0;
+
+		for (int value : list) {
+			result += value;
+		}
+
+		return result;
+	}
 
 	public void load() {
 		Scanner input = new Scanner(System.in);
-		ArrayList<String[]> line = new ArrayList<>();
-		String inputLine;
+		String line;
 
-		//loading input
-		while (!((inputLine = input.nextLine()).equals("exit"))) {
-			line.add( inputLine.split(" "));
-		}
+		while (!(line = input.nextLine()).equals( "exit")) {
+			String[] words = line.split(" ");
 
-		//loading cities
-		int idCity = 0;
-		world.add( new City( line.get(0)[0]));
-
-		for (String[] loadedLine : line) {
-			if (!world.get(idCity).getName().equals(loadedLine[0])) {
-				world.add(new City(loadedLine[0]));
-				idCity++;
-			}
-		}
-
-		//loading distances
-		idCity = 0;
-		for (String[] loadedLine : line) {
-			if ()
-			world.get( getCityID( loadedLine[0])).setDistance( loadedLine[2], Integer.parseInt( loadedLine[4]));
-			world.get( getCityID( loadedLine[2])).setDistance( loadedLine[0], Integer.parseInt( loadedLine[4]));
+			city1.add(words[0]);
+			city2.add(words[2]);
+			distance.add( Integer.parseInt( words[4]));
+			visited.put(words[0], false);
+			visited.put(words[2], false);
 		}
 	}
 
+	public ArrayList<String> reachable(String currentCity) {
+		ArrayList<String> list = new ArrayList<>();
 
-	public void clearVisited() {
-		for (City city : world) {
-			city.visited = false;
-		}
-	}
+		for (int i = 0; i < city1.size(); i++) {
+			String pair1 = city1.get(i);
+			String pair2 = city2.get(i);
 
-	public boolean allVisited() {
-		for (City city : world) {
-			if (!city.visited) {
-				return false;
+			if (visited.get( pair1) && visited.get( pair2)) {
+				continue;
 			}
-		}
-		return true;
-	}
 
-	public int getCityID(String cityName) {
-		int id = 0;
-
-		for (City city : world) {
-			if (city.getName().equals( cityName)) {
-				return id;
-			}
-			id++;
-		}
-		return Integer.MAX_VALUE;
-	}
-
-	public ArrayList<City> getDestinations (City currentCity) {
-		ArrayList<City> destinations = new ArrayList<>();
-
-		for (String cityName : currentCity.distance.keySet()) {
-			for (City cityObject : world) {
-				if (cityObject.getName().equals( cityName)) {
-					destinations.add( cityObject);
-				}
+			if (pair1.equals( currentCity)) {
+				list.add( pair2);
+			} else if (pair2.equals( currentCity)) {
+				list.add( pair1);
 			}
 		}
 
-		return destinations;
+		return list;
 	}
 }
 
 public class Day9_All_in_a_Single_Night {
-	private Travel travel = new Travel();
-	private ArrayList<Integer> travelled = new ArrayList<>();
-	private int result = Integer.MAX_VALUE;
-
-	private void search(City currentCity) {
-		ArrayList<City> destinations = travel.getDestinations(currentCity);
-		for (int i = 0, destinationsSize = destinations.size(); i < destinationsSize; i++) {
-			City cityForTravel = destinations.get(i);
-
-			if (!cityForTravel.visited) {
-				cityForTravel.visited = true;
-
-				int lastTravelled = travelled.get(travelled.size() - 1);
-				int gonnaTravell = currentCity.getDistance(cityForTravel.getName());
-				travelled.add(lastTravelled + gonnaTravell);
-
-				if (travel.allVisited()) {
-					// endpoint 1 - finish
-					travel.clearVisited();
-					result = Math.min(result, travelled.get(travelled.size() - 1));
-
-					travelled.remove(travelled.size() - 1);
-				} else {
-					search(cityForTravel);
-				}
-			}
-
-			// endpoint 2 - dead end
-			if ( i+1 == destinationsSize) {
-				travelled.remove(travelled.size() - 1);
-			}
-		}
-	}
-
-	public void shortestRoute() {
+	public static void shortestRoute() {
+		Travel travel = new Travel();
 		travel.load();
-		for (City currentCity : travel.world) {
-			travelled.add(0);
-			search(currentCity);
+
+		Tree tree = new Tree();
+		tree.setTravel( travel);
+
+		for (String cityName : travel.visited.keySet()) {
+			travel.visited.put( cityName, true);
+			tree.search( cityName);
+			tree.travelled.clear();
 		}
 
-		System.out.print(result);
+		System.out.println( tree.shortest);
 	}
 }
