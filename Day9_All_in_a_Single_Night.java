@@ -7,7 +7,7 @@ import java.util.Scanner;
 class Tree {
 	private Travel travel;
 	ArrayList<Integer> travelled = new ArrayList<>();
-	int shortest = Integer.MAX_VALUE;
+	int shortest = Integer.MIN_VALUE;
 
 	public void setTravel(Travel travelInfo) {
 		travel = travelInfo;
@@ -35,25 +35,28 @@ class Tree {
 
 	public void unVisit(String city) {
 		travel.visited.put( city, false);
-		if ( travelled.size() > 0) {
-			travelled.remove( travelled.size() - 1);
-		}
+		travelled.remove( travelled.size() - 1);
 	}
 
 	public void search(String root) {
-		for (String reachableCity : travel.reachable(root)) {
-			//only unvisited
-			visit(root, reachableCity);
+		ArrayList<String> reachable = new ArrayList<>( travel.reachable( root));
+		int branches = reachable.size();
 
+		if (branches == 1) {
+			travel.visited.put( reachable.get(0), true);
 			if (allVisited()) {
-				shortest = Math.min(shortest, Travel.sum(travelled));
+				visit(root, reachable.get(0));
+				shortest = Math.max(shortest, Travel.sum(travelled));
+				unVisit( reachable.get(0));
+			} else {
+				travel.visited.put( reachable.get(0), false);
+			}
+		} else {
+			for (String reachableCity : reachable) {
+				visit(root, reachableCity);
+				search(reachableCity);
 				unVisit(reachableCity);
 			}
-
-			search(reachableCity);
-
-			//after returns from recursion
-			unVisit(reachableCity);
 		}
 	}
 }
@@ -63,6 +66,12 @@ class Travel {
 	ArrayList<String> city1 = new ArrayList<>();
 	ArrayList<String> city2 = new ArrayList<>();
 	HashMap<String, Boolean> visited = new HashMap<>();
+
+	public void iniciateVisited() {
+		for (String cityName : visited.keySet()) {
+			visited.put( cityName, false);
+		}
+	}
 
 	public static int sum(ArrayList<Integer> list) {
 		int result = 0;
@@ -122,6 +131,7 @@ public class Day9_All_in_a_Single_Night {
 		for (String cityName : travel.visited.keySet()) {
 			travel.visited.put( cityName, true);
 			tree.search( cityName);
+			travel.iniciateVisited();
 			tree.travelled.clear();
 		}
 
