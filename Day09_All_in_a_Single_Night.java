@@ -120,7 +120,7 @@ class Travel {
 	}
 }
 
-public class Day9_All_in_a_Single_Night {
+public class Day09_All_in_a_Single_Night {
 	public static void shortestRoute() {
 		Travel travel = new Travel();
 		travel.load();

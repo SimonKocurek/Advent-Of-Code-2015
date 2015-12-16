@@ -38,7 +38,7 @@ class Signal {
 }
 
 
-public class Day7_Some_Assembly_Required {
+public class Day07_Some_Assembly_Required {
 	public static void signals() {
 		Scanner input = new Scanner(System.in);
 		Signal signal = new Signal();

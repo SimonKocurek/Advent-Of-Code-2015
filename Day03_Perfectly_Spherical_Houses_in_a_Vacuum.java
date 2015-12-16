@@ -26,7 +26,7 @@ class House {
 	}
 }
 
-public class Day3_Perfectly_Spherical_Houses_in_a_Vacuum {
+public class Day03_Perfectly_Spherical_Houses_in_a_Vacuum {
 	public static void Count_Duplicates() {
 		Scanner input = new Scanner(System.in);
 		String instructions = input.next();

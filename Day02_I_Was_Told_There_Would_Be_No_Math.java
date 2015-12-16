@@ -2,7 +2,7 @@ package AdventOfCode;
 
 import java.util.Scanner;
 
-public class Day2_I_Was_Told_There_Would_Be_No_Math {
+public class Day02_I_Was_Told_There_Would_Be_No_Math {
 	public static void Size() {
 		Scanner input = new Scanner(System.in);
 		int total = 0;

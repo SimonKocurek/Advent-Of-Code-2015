@@ -79,7 +79,7 @@ class Word {
 	}
 }
 
-public class Day5_Doesn_t_He_Have_Intern_Elves_For_This {
+public class Day05_Doesn_t_He_Have_Intern_Elves_For_This {
 	public static void niceString() {
 		Scanner input = new Scanner(System.in);
 		String line;

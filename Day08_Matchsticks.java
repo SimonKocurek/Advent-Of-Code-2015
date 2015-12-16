@@ -2,7 +2,7 @@ package AdventOfCode;
 
 import java.util.Scanner;
 
-public class Day8_Matchsticks {
+public class Day08_Matchsticks {
 	public static void sizeDifference() {
 		Scanner input = new Scanner(System.in);
 		String line;

@@ -86,7 +86,7 @@ class BrightLights {
 	}
 }
 
-public class Day6_Probably_a_Fire_Hazard {
+public class Day06_Probably_a_Fire_Hazard {
 	public static void main(String[] args) {
 		Scanner input = new Scanner(System.in);
 		BrightLights lights = new BrightLights();

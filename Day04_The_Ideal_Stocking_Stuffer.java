@@ -3,7 +3,7 @@ package AdventOfCode;
 import java.security.MessageDigest;
 import java.util.Scanner;
 
-public class Day4_The_Ideal_Stocking_Stuffer {
+public class Day04_The_Ideal_Stocking_Stuffer {
 	public static void MD5() throws Exception {
 		StringBuilder hexString = new StringBuilder();
 		Scanner input = new Scanner(System.in);

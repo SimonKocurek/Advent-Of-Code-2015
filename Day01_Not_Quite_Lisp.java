@@ -6,7 +6,7 @@ import java.util.Scanner;
  * Created by Kocurek on 01-Dec-15.
  */
 
-public class Day1_Not_Quite_Lisp {
+public class Day01_Not_Quite_Lisp {
 	public static void run() {
 		Scanner input = new Scanner(System.in);
 		String parenthesis = input.next();
