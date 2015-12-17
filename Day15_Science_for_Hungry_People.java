@@ -47,29 +47,47 @@ public class Day15_Science_for_Hungry_People {
 		}
 	}
 
-	private void recursion() {
-		for (Ingredient ingredient : ingredients) {
-			if (ingredient != firstIngredient) {
-				ingredient.count ++;
-				remainingIngredients --;
+	private boolean hasCalories() {
+		int calories = 0;
 
-				bestOption();
+		for (Ingredient ingredient : ingredients)
+			calories+= ingredient.count * ingredient.calories;
 
-				remainingIngredients ++;
-				ingredient.count --;
+		return calories == 500;
+	}
+
+	private void recursion(int i) {
+		if (remainingIngredients == 0) {
+			if (hasCalories()) {
+				if (score() > maxScore) {
+					maxScore = score();
+				}
+			}
+
+		} else {
+			for (int ingredientsSize = ingredients.size(); i < ingredientsSize; i++) {
+				Ingredient ingredient = ingredients.get(i);
+
+				ingredient.count++;
+				remainingIngredients--;
+
+				recursion(i);
+
+				remainingIngredients++;
+				ingredient.count--;
 			}
 		}
 	}
 
 	private void bestOption() {
-		recursion();
+		recursion(1);
 
-		if (score() > maxScore) {
-			maxScore = score();
+		while (firstIngredient.count != 0) {
+			recursion(1);
+
+			firstIngredient.count --;
+			remainingIngredients ++;
 		}
-
-		firstIngredient.count --;
-		remainingIngredients ++;
 	}
 
 	public void bake() {
