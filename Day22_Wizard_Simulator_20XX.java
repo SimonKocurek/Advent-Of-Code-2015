@@ -2,165 +2,112 @@ package AdventOfCode;
 
 import java.util.Scanner;
 
-class SpellBook {
-	int spellCount = 5;
+public class Day22_Wizard_Simulator_20XX {
+	private int bossDamage;
+	private int leastUsedMana = Integer.MAX_VALUE;
 
-	public void magicMissile(int[] mana, int[] bossHealth, boolean cast) {
-		if (cast) {
-			mana[0] -= 53;
-			bossHealth[0] -= 4;
-		}
-	}
+	private void playerTurn( int mana, int playerHealth, int bossHealth, int usedMana,
+	                         int activeShield, boolean addedArmor, int activePoison, int activeRecharge) {
+		playerHealth -= 1;
 
-	public void drain(int[] mana, int[] bossHealth, int[] playerHealth, boolean cast) {
-		if (cast) {
-			mana[0] -= 73;
-			bossHealth[0] -= 2;
-			playerHealth[0] += 2;
-		}
-	}
-
-	private int activeShield = 0;
-	private boolean addedArmor = false;
-	public void shield(int[] mana, GameHero player, boolean cast) {
+		// Overtime effects
 		if (activeShield > 0) {
-			if (!addedArmor) {
-				player.armor += 7;
-				addedArmor = true;
-			}
 			activeShield --;
-		} else {
-			player.armor -= 7;
-			addedArmor = false;
 		}
 
-		if (cast) {
-			mana[0] -= 113;
-			activeShield = 6;
-		}
-	}
-
-	private int activePoison = 0;
-	public void poison(int[] mana, GameHero boss, boolean cast) {
 		if (activePoison > 0) {
-			boss.health -= 3;
+			bossHealth -= 3;
 			activePoison --;
 		}
 
-		if (cast) {
-			mana[0] -= 173;
-			activePoison = 6;
-		}
-	}
-
-	private int activeRecharge = 0;
-	public void recharge(int[] mana, boolean cast) {
 		if (activeRecharge > 0) {
-			mana[0] += 101;
+			mana += 101;
+			activeRecharge --;
 		}
+		//
 
-		if (cast) {
-			mana[0] -= 229;
-			activeRecharge = 5;
-		}
-	}
-}
+		if (playerHealth > 0 && bossHealth > 0 && mana >= 53) {
 
-class GameHero {
-	int health = 50;
-	int armor = 0;
-	int damage = 0;
-}
-
-public class Day22_Wizard_Simulator_20XX {
-	private GameHero player = new GameHero();
-	private GameHero boss = new GameHero();
-	private SpellBook spellBook = new SpellBook();
-
-	private boolean playerTurn;
-	private int leastUsedMana = Integer.MAX_VALUE;
-
-	private void playerTurn( int mana, int playerHealth, int bossHealth, int usedMana) {
-		int[] manaChange = {0};
-		int[] bossHealthChange = {0};
-		int[] playerHealthChange = {0};
-
-		if (playerHealth > 0 && bossHealth > 0) {
-			playerTurn = true;
-
-			for(int i = 0; i < spellBook.spellCount; i ++) {
+			int spellCount = 5;
+			for(int i = spellCount; i > 0; i --) {
 				switch (i) {
-					case 0:
-						manaChange[0] = 0;
-						bossHealthChange[0] = 0;
-
-						spellBook.magicMissile(manaChange, bossHealthChange, playerTurn);
-
-						bossHealth += bossHealthChange[0];
-						usedMana -= manaChange[0];
-
-						bossTurn( mana + manaChange[0]);
-						break;
 					case 1:
-						manaChange[0] = 0;
-						bossHealthChange[0] = 0;
-						playerHealthChange[0] = 0;
-
-						spellBook.drain(manaChange, bossHealthChange, playerHealthChange, playerTurn);
-
-						usedMana += manaChange[0];
-						bossHealth += bossHealthChange[0];
-						playerHealth += playerHealthChange[0];
-
-						bossTurn( mana - manaChange[0]);
+						if (mana >= 53)
+							bossTurn( mana - 53, playerHealth, bossHealth - 4, usedMana + 53,
+								activeShield, addedArmor, activePoison, activeRecharge);
 						break;
 					case 2:
-						spellBook.shield(manaChange, player, playerTurn);
-						usedMana += 113;
-						bossTurn();
-						usedMana -= 113;
+						if (mana >= 73)
+							bossTurn( mana - 73, playerHealth + 2, bossHealth - 2, usedMana + 73,
+								activeShield, addedArmor, activePoison, activeRecharge);
 						break;
 					case 3:
-						spellBook.poison(manaChange, boss, playerTurn);
-						usedMana += 173;
-						bossTurn();
-						usedMana -= 173;
+						if (mana >= 113 && activeShield == 0)
+							bossTurn( mana - 113, playerHealth, bossHealth, usedMana + 113,
+									6, addedArmor, activePoison, activeRecharge);
 						break;
 					case 4:
-						spellBook.recharge(manaChange, playerTurn);
-						usedMana += 229;
-						bossTurn();
-						usedMana -= 229;
+						if (mana >= 173 && activePoison == 0)
+							bossTurn( mana - 173, playerHealth, bossHealth, usedMana + 173,
+									activeShield, addedArmor, 6, activeRecharge);
+						break;
+					case 5:
+						if (mana >= 229 && activeRecharge == 0)
+							bossTurn( mana - 229, playerHealth, bossHealth, usedMana + 229,
+									activeShield, addedArmor, activePoison, 5);
 						break;
 				}
 			}
-		} else if (boss.health <= 0) {
+		} else if (bossHealth <= 0) {
+			if (Integer.min(leastUsedMana, usedMana) != leastUsedMana) {
+				System.out.println( usedMana);
+			}
 			leastUsedMana = Integer.min(leastUsedMana, usedMana);
 		}
 	}
 
-	private void bossTurn( int mana) {
-		if (player.health > 0 && boss.health > 0) {
-			playerTurn = false;
+	private void bossTurn( int mana, int playerHealth, int bossHealth, int usedMana,
+	                       int activeShield, boolean addedArmor, int activePoison, int activeRecharge) {
+		// Overtime effects
+		if (activeShield > 0) {
+			addedArmor = true;
+			activeShield --;
+		} else {
+			addedArmor = false;
+		}
 
-			for(int i = 0; i < spellBook.spellCount; i ++) {
-				switch (i) {
-					case 0: spellBook.magicMissile(manaChange, boss, playerTurn); break;
-					case 1: spellBook.drain(manaChange, boss, player, playerTurn); break;
-					case 2: spellBook.shield(manaChange, player, playerTurn); break;
-					case 3: spellBook.poison(manaChange, boss, playerTurn); break;
-					case 4: spellBook.recharge(manaChange, playerTurn); break;
-				}
+		if (activePoison > 0) {
+			bossHealth -= 3;
+			activePoison --;
+		}
+
+		if (activeRecharge > 0) {
+			mana += 101;
+			activeRecharge --;
+		}
+		//
+
+		if (bossHealth > 0) {
+			int attack;
+
+			if (addedArmor) {
+				attack = bossDamage - 7;
+			} else {
+				attack = bossDamage;
 			}
 
-			int attack = boss.damage - player.armor;
-
 			if (attack > 0)
-				player.health -= attack;
+				playerHealth -= attack;
 			else
-				player.health -= 1;
+				playerHealth -= 1;
 
-		} else if (boss.health <= 0) {
+			playerTurn( mana, playerHealth, bossHealth, usedMana,
+					activeShield, addedArmor, activePoison, activeRecharge);
+
+		} else {
+			if (Integer.min(leastUsedMana, usedMana) != leastUsedMana) {
+				System.out.println( usedMana);
+			}
 			leastUsedMana = Integer.min(leastUsedMana, usedMana);
 		}
 	}
@@ -168,10 +115,13 @@ public class Day22_Wizard_Simulator_20XX {
 	public void leastMana() {
 		Scanner input = new Scanner(System.in);
 
-		boss.health = Integer.parseInt( input.nextLine().split(" ")[2]);
-		boss.damage = Integer.parseInt( input.nextLine().split(" ")[1]);
+		int startingMana = 500;
+		int playerHealth = 50;
+		int bossHealth = Integer.parseInt( input.nextLine().split(" ")[2]);
+		bossDamage = Integer.parseInt( input.nextLine().split(" ")[1]);
 
-		playerTurn( 500, player.health, boss.health, 0);
+		playerTurn( startingMana, playerHealth, bossHealth, 0,
+				0, false, 0, 0);
 
 		System.out.println(leastUsedMana);
 	}
